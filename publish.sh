@@ -10,17 +10,13 @@ function tag_remote() {
 
   # POST the new tag ref to repo via Github API
   >&2 curl -s -X POST "https://api.github.com/repos/$repo/git/refs" \
-  -H "Authorization: token $GITHUB_TOKEN" \
+  -H "Authorization: token $GITHUB_TOKEN0" \
   -d @- << EOF
   {
     "ref": "refs/tags/$new_tag",
     "sha": "$commit"
   }
 EOF
-  curl_exit=$?
-  >&2 echo curl exit code $curl_exit
-  [ $curl_exit -ne 0 ] && exit $curl_exit
-  >&2 echo should be here.
 }
 
 function resolve_version() {
