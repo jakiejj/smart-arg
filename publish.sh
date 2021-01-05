@@ -9,7 +9,7 @@ function tag_remote() {
   new_tag=$1
 
   # POST the new tag ref to repo via Github API
-  >&2 curl -s -X POST "https://api.github.com/repos/$repo/git/refs" \
+  HTTP_STATUS=$(curl -w "%{http_code}" -o >(cat >&2) -s -X POST "https://api.github.com/repos/$repo/git/refs" \
   -H "Authorization: token $GITHUB_TOKEN0" \
   -d @- << EOF
   {
@@ -17,6 +17,8 @@ function tag_remote() {
     "sha": "$commit"
   }
 EOF
+)
+  [ "$HTTP_STATUS" == "401" ]
 }
 
 function resolve_version() {
@@ -32,7 +34,7 @@ function resolve_version() {
     resolved_version=$star_version_prefix$((patch_version))
   elif [[ "$star_version" =~ \* ]]; then
     printf "Unsupported star version: '%s'\nOnly supports star patch version." "$star_version" >&2
-    exit 128
+    return 128
   else
     resolved_version=$star_version
   fi
@@ -48,6 +50,9 @@ git tag "$version"  # for setuptools-scm
 normalized_version=v$(python setup.py --version)
 [ "$version" != "$normalized_version" ] && git tag "$normalized_version" && git tag -d "$version"
 [ "$GITHUB_TOKEN" != "" ] && tag_remote "$normalized_version"
+
+echo "pass"
+exit 2
 
 rm -rf dist
 python setup.py sdist
