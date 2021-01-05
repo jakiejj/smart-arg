@@ -10,13 +10,15 @@ function tag_remote() {
 
   # POST the new tag ref to repo via Github API
   >&2 curl -s -X POST "https://api.github.com/repos/$repo/git/refs" \
-  -H "Authorization: token $GITHUB_TOKEN0" \
+  -H "Authorization: token $GITHUB_TOKEN" \
   -d @- << EOF
   {
     "ref": "refs/tags/$new_tag",
     "sha": "$commit"
   }
 EOF
+  curl_exit=$?
+  [ $curl_exit != 0 ] && exit $curl_exit
 }
 
 function resolve_version() {
@@ -47,9 +49,9 @@ git tag "$version"  # for setuptools-scm
 # version may be normalized by setuptools
 normalized_version=v$(python setup.py --version)
 [ "$version" != "$normalized_version" ] && git tag "$normalized_version" && git tag -d "$version"
+
 [ "$GITHUB_TOKEN" != "" ] && tag_remote "$normalized_version"
 
->&2 echo "Uploading version $normalized_version to pypi"
 rm -rf dist
 python setup.py sdist
 twine upload dist/* --verbose
