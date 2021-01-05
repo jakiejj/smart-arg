@@ -51,6 +51,7 @@ normalized_version=v$(python setup.py --version)
 [ "$version" != "$normalized_version" ] && git tag "$normalized_version" && git tag -d "$version"
 [ "$GITHUB_TOKEN" != "" ] && tag_remote "$normalized_version"
 
+echo "Uploading version $normalized_version to pypi"
 rm -rf dist
 python setup.py sdist
 twine upload dist/* --verbose
