@@ -18,7 +18,9 @@ function tag_remote() {
   }
 EOF
   curl_exit=$?
+  >&2 echo curl exit code $curl_exit
   [ $curl_exit -ne 0 ] && exit $curl_exit
+  >&2 echo should be here.
 }
 
 function resolve_version() {
@@ -51,7 +53,7 @@ normalized_version=v$(python setup.py --version)
 [ "$version" != "$normalized_version" ] && git tag "$normalized_version" && git tag -d "$version"
 [ "$GITHUB_TOKEN" != "" ] && tag_remote "$normalized_version"
 
-echo "Uploading version $normalized_version to pypi"
+>&2 echo "Uploading version $normalized_version to pypi"
 rm -rf dist
 python setup.py sdist
 twine upload dist/* --verbose
