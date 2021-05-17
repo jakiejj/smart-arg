@@ -368,8 +368,11 @@ class _dataclasses:
     new_instance = lambda arg_class, _: arg_class.__original_new__(arg_class)
 
 
+_type_proxies = [_namedtuple, _dataclasses]  # Supported container types. Users can extend it if they know what they are doing. Not officially supported yet.
+
+
 def _get_type_proxy(arg_class):
-    return _namedtuple.proxy(arg_class) or _dataclasses.proxy(arg_class)
+    return next(filter(lambda p: p.proxy(arg_class), _type_proxies), False)
 
 
 def _unwrap_optional(arg_type):
